@@ -9,6 +9,9 @@
 #import "ViewController.h"
 #import "HeaderView.h"
 #import "WZBSegmentedControl.h"
+#import "PeronalNavView.h"
+
+#define kNavigationBarHeight 64
 
 #define WZBScreenWidth [UIScreen mainScreen].bounds.size.width
 #define WZBScreenHeight [UIScreen mainScreen].bounds.size.height
@@ -18,6 +21,12 @@
 #define WZBColor(r, g, b) [UIColor colorWithRed:(r) / 255.0f green:(g) / 255.0f blue:(b) / 255.0f alpha:1.0]
 
 @interface ViewController () <UITableViewDelegate, UITableViewDataSource>
+{
+    PeronalNavView    * _personalNavClearView;
+    PeronalNavView    * _personalNavWhiteVew;
+    
+    BOOL    _disableNav;
+}
 
 // 左边的tableView
 @property (nonatomic, strong) UITableView *leftTableView;
@@ -40,12 +49,15 @@
 // 头部头像
 @property (nonatomic, strong) UIImageView *avatar;
 
+
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    _disableNav = NO;
     
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
@@ -126,12 +138,31 @@
     avatar.transform = CGAffineTransformMakeScale(2, 2);
     
     self.avatar = avatar;
+    
+    //NAV
+    if (_disableNav) {
+        _personalNavClearView = [[PeronalNavView alloc] initWithFrame:CGRectMake(0, 0, WZBScreenWidth, kNavigationBarHeight)];
+        [self.view addSubview:_personalNavClearView];
+        
+        _personalNavWhiteVew = [[PeronalNavView alloc] initWithFrame:CGRectMake(0, 0, WZBScreenWidth, kNavigationBarHeight)];
+        [_personalNavWhiteVew createView_whiteBack];
+        _personalNavWhiteVew.titleLabel.text = @"那片阳光";
+        
+        _personalNavWhiteVew.alpha = 0;
+        [self.view addSubview:_personalNavWhiteVew];
+    }
+
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    self.navigationController.navigationBarHidden = _disableNav;
+    
 }
 
 // 创建tableView
 - (UITableView *)tableViewWithX:(CGFloat)x {
     
-    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(x, 0, WZBScreenWidth, WZBScreenHeight - 64)];
+    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(x, 0, WZBScreenWidth, WZBScreenHeight - 0)];
     [self.scrollView addSubview:tableView];
     tableView.backgroundColor = [UIColor colorWithWhite:0.998 alpha:1];
     tableView.showsVerticalScrollIndicator = NO;
@@ -180,24 +211,44 @@
     // 如果当前滑动的是tableView
     if ([scrollView isKindOfClass:[UITableView class]]) {
         
+
+        CGFloat selectY = 150 - kNavigationBarHeight;
         CGFloat contentOffsetY = scrollView.contentOffset.y;
+        CGFloat navH = 0;
+        
+        if (_disableNav) {
+            navH = 64;
+            if (contentOffsetY > selectY - kNavigationBarHeight) {
+                _personalNavWhiteVew.alpha = (contentOffsetY - selectY + kNavigationBarHeight)/kNavigationBarHeight;
+            }
+            if (contentOffsetY < selectY) {
+                _personalNavWhiteVew.alpha = (contentOffsetY - selectY) / kNavigationBarHeight;
+            }
+            
+            NSLog(@"%f, %f", contentOffsetY, selectY);
+        }
+        
+        
+        
         
         // 如果滑动没有超过150
-        if (contentOffsetY < 150) {
+        if (contentOffsetY < 150 - navH) {
             
             // 让这三个tableView的偏移量相等
             self.leftTableView.contentOffset = self.centerTableView.contentOffset = self.rightTableView.contentOffset = scrollView.contentOffset;
             
             // 改变headerView的y值
             CGRect frame = self.headerView.frame;
-            CGFloat y = -self.rightTableView.contentOffset.y;
+            CGFloat y = -self.rightTableView.contentOffset.y ;
             frame.origin.y = y;
             self.headerView.frame = frame;
             
             // 一旦大于等于150了，让headerView的y值等于150，就停留在上边了
         } else if (contentOffsetY >= 150) {
             CGRect frame = self.headerView.frame;
-            frame.origin.y = -150;
+            //如果使用自定义nav
+            frame.origin.y = -150 + navH;
+            //frame.origin.y = -150
             self.headerView.frame = frame;
         }
     }
