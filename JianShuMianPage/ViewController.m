@@ -131,7 +131,7 @@
 // 创建tableView
 - (UITableView *)tableViewWithX:(CGFloat)x {
     
-    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(x, 0, WZBScreenWidth, WZBScreenHeight - 0)];
+    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(x, 0, WZBScreenWidth, WZBScreenHeight - 64)];
     [self.scrollView addSubview:tableView];
     tableView.backgroundColor = [UIColor colorWithWhite:0.998 alpha:1];
     tableView.showsVerticalScrollIndicator = NO;
