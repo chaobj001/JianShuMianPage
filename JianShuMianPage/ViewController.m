@@ -57,7 +57,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    _disableNav = NO;
+    _disableNav = YES;
     
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
@@ -244,7 +244,7 @@
             self.headerView.frame = frame;
             
             // 一旦大于等于150了，让headerView的y值等于150，就停留在上边了
-        } else if (contentOffsetY >= 150) {
+        } else if (contentOffsetY >= 150-navH) {
             CGRect frame = self.headerView.frame;
             //如果使用自定义nav
             frame.origin.y = -150 + navH;
